@@ -1,5 +1,5 @@
-import { Transaction } from './types';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
+import { Transaction, CreditCard, Installment, Loan } from './types';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isWithinInterval, parseISO, addMonths, addDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 export const generateId = (): string => {
@@ -151,4 +151,136 @@ export const getMonthlyData = (transactions: Transaction[]): { month: string; in
     .map(([month, data]) => ({ month, ...data }))
     .reverse()
     .slice(0, 6);
+};
+
+// ===== BORÇ & TAKSİT FONKSİYONLARI =====
+
+export const loadCreditCards = (): CreditCard[] => {
+  try {
+    const data = localStorage.getItem('finance_credit_cards');
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveCreditCards = (cards: CreditCard[]): void => {
+  localStorage.setItem('finance_credit_cards', JSON.stringify(cards));
+};
+
+export const loadInstallments = (): Installment[] => {
+  try {
+    const data = localStorage.getItem('finance_installments');
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveInstallments = (installments: Installment[]): void => {
+  localStorage.setItem('finance_installments', JSON.stringify(installments));
+};
+
+export const loadLoans = (): Loan[] => {
+  try {
+    const data = localStorage.getItem('finance_loans');
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveLoans = (loans: Loan[]): void => {
+  localStorage.setItem('finance_loans', JSON.stringify(loans));
+};
+
+// Kredi kartı bazlı toplam taksit borcu
+export const getCardTotalDebt = (cardId: string, installments: Installment[]): number => {
+  return installments
+    .filter((i) => i.creditCardId === cardId && i.isActive)
+    .reduce((sum, i) => sum + i.installmentAmount * (i.installmentCount - i.paidInstallments), 0);
+};
+
+// Kredi kartı bazlı kalan limit
+export const getCardRemainingLimit = (card: CreditCard, installments: Installment[]): number => {
+  const totalDebt = getCardTotalDebt(card.id, installments);
+  return card.limit - totalDebt;
+};
+
+// Bu ay ödenecek taksitler
+export const getThisMonthInstallments = (installments: Installment[]): { installment: Installment; dueDate: Date }[] => {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  return installments
+    .filter((i) => i.isActive && i.paidInstallments < i.installmentCount)
+    .map((i) => {
+      const startDate = parseISO(i.startDate);
+      const monthsDiff = (currentYear - startDate.getFullYear()) * 12 + (currentMonth - startDate.getMonth());
+      const currentInstallment = monthsDiff + 1;
+      
+      if (currentInstallment > 0 && currentInstallment <= i.installmentCount) {
+        const dueDate = new Date(currentYear, currentMonth, i.paymentDay);
+        return { installment: i, dueDate };
+      }
+      return null;
+    })
+    .filter((item): item is { installment: Installment; dueDate: Date } => item !== null);
+};
+
+// Bu ay ödenecek kredi taksitleri
+export const getThisMonthLoans = (loans: Loan[]): { loan: Loan; dueDate: Date }[] => {
+  const now = new Date();
+  
+  return loans
+    .filter((l) => l.isActive && l.paidInstallments < l.totalInstallments)
+    .map((l) => {
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), l.paymentDay);
+      return { loan: l, dueDate };
+    });
+};
+
+// Toplam aylık borç ödemesi
+export const getTotalMonthlyDebtPayment = (installments: Installment[], loans: Loan[]): number => {
+  const installmentPayments = getThisMonthInstallments(installments)
+    .reduce((sum, item) => sum + item.installment.installmentAmount, 0);
+  
+  const loanPayments = getThisMonthLoans(loans)
+    .reduce((sum, item) => sum + item.loan.monthlyPayment, 0);
+  
+  return installmentPayments + loanPayments;
+};
+
+// Toplam borç (taksit + kredi)
+export const getTotalDebt = (installments: Installment[], loans: Loan[]): number => {
+  const installmentDebt = installments
+    .filter((i) => i.isActive)
+    .reduce((sum, i) => sum + i.installmentAmount * (i.installmentCount - i.paidInstallments), 0);
+  
+  const loanDebt = loans
+    .filter((l) => l.isActive)
+    .reduce((sum, l) => sum + l.remainingAmount, 0);
+  
+  return installmentDebt + loanDebt;
+};
+
+// Taksit ilerleme yüzdesi
+export const getInstallmentProgress = (installment: Installment): number => {
+  return (installment.paidInstallments / installment.installmentCount) * 100;
+};
+
+// Kredi ilerleme yüzdesi
+export const getLoanProgress = (loan: Loan): number => {
+  return (loan.paidInstallments / loan.totalInstallments) * 100;
+};
+
+// Kalan taksit sayısı
+export const getRemainingInstallments = (installment: Installment): number => {
+  return installment.installmentCount - installment.paidInstallments;
+};
+
+// Kalan kredi vadesi
+export const getRemainingLoanMonths = (loan: Loan): number => {
+  return loan.totalInstallments - loan.paidInstallments;
 };

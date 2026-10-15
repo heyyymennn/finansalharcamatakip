@@ -14,6 +14,7 @@ import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import Charts from './components/Charts';
 import AIAdvisor from './components/AIAdvisor';
+import DebtManager from './components/DebtManager';
 import PWAInstallButton from './components/PWAInstallButton';
 import {
   LayoutDashboard,
@@ -25,6 +26,7 @@ import {
   Wallet,
   Calendar,
   Bot,
+  CreditCard,
 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -73,6 +75,7 @@ const App: React.FC = () => {
   const navItems = [
     { id: 'dashboard' as ViewMode, label: 'Özet', icon: LayoutDashboard },
     { id: 'transactions' as ViewMode, label: 'İşlemler', icon: List },
+    { id: 'debts' as ViewMode, label: 'Borçlar', icon: CreditCard },
     { id: 'analytics' as ViewMode, label: 'Analiz', icon: BarChart3 },
     { id: 'ai' as ViewMode, label: 'AI Danışman', icon: Bot },
   ];
@@ -195,6 +198,9 @@ const App: React.FC = () => {
               transactions={filteredTransactions}
               onDelete={handleDeleteTransaction}
             />
+          )}
+          {view === 'debts' && (
+            <DebtManager />
           )}
           {view === 'analytics' && (
             <Charts transactions={filteredTransactions} />

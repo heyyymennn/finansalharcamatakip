@@ -12,7 +12,68 @@ export interface CategoryBudget {
   limit: number;
 }
 
-export type ViewMode = 'dashboard' | 'transactions' | 'analytics' | 'ai';
+export type ViewMode = 'dashboard' | 'transactions' | 'analytics' | 'debts' | 'ai';
+
+// Kredi Kartı
+export interface CreditCard {
+  id: string;
+  name: string;
+  bank: string;
+  limit: number;
+  color: string;
+  lastFourDigits: string;
+}
+
+// Taksitli İşlem
+export interface Installment {
+  id: string;
+  creditCardId: string;
+  description: string;
+  totalAmount: number;
+  installmentCount: number;
+  installmentAmount: number;
+  startDate: string; // İlk taksit tarihi
+  paymentDay: number; // Ayın kaçıncı günü (1-31)
+  category: string;
+  paidInstallments: number; // Ödenen taksit sayısı
+  isActive: boolean;
+}
+
+// Kredi Borcu
+export interface Loan {
+  id: string;
+  type: 'konut' | 'ihtiyac' | 'tasit' | 'ogretim' | 'diger';
+  bank: string;
+  description: string;
+  totalAmount: number; // Toplam kredi tutarı
+  remainingAmount: number; // Kalan borç
+  monthlyPayment: number; // Aylık taksit
+  totalInstallments: number; // Toplam vade
+  paidInstallments: number; // Ödenen taksit
+  interestRate: number; // Faiz oranı
+  startDate: string;
+  paymentDay: number; // Ayın kaçıncı günü
+  isActive: boolean;
+}
+
+export const LOAN_TYPES = [
+  { value: 'konut', label: 'Konut Kredisi', icon: '🏠' },
+  { value: 'ihtiyac', label: 'İhtiyaç Kredisi', icon: '💰' },
+  { value: 'tasit', label: 'Taşıt Kredisi', icon: '🚗' },
+  { value: 'ogretim', label: 'Öğretim Kredisi', icon: '🎓' },
+  { value: 'diger', label: 'Diğer', icon: '📋' },
+];
+
+export const CREDIT_CARD_COLORS = [
+  '#3B82F6', // Blue
+  '#8B5CF6', // Purple
+  '#EC4899', // Pink
+  '#F59E0B', // Amber
+  '#10B981', // Emerald
+  '#EF4444', // Red
+  '#06B6D4', // Cyan
+  '#84CC16', // Lime
+];
 
 export const INCOME_CATEGORIES = [
   'Maaş',

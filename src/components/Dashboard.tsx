@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Transaction } from '../types';
 import {
   formatCurrency,
@@ -8,6 +8,10 @@ import {
   getTransactionsByCategory,
   formatDate,
   getCategoryColor,
+  getTotalMonthlyDebtPayment,
+  getTotalDebt,
+  loadInstallments,
+  loadLoans,
 } from '../utils';
 import {
   TrendingUp,
@@ -17,6 +21,7 @@ import {
   ArrowDownRight,
   Target,
   Activity,
+  CreditCard,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -25,6 +30,16 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ transactions, period }) => {
+  const [monthlyDebt, setMonthlyDebt] = useState(0);
+  const [totalDebtAmount, setTotalDebtAmount] = useState(0);
+
+  useEffect(() => {
+    const installments = loadInstallments();
+    const loans = loadLoans();
+    setMonthlyDebt(getTotalMonthlyDebtPayment(installments, loans));
+    setTotalDebtAmount(getTotalDebt(installments, loans));
+  }, []);
+
   const totalIncome = getTotalIncome(transactions);
   const totalExpense = getTotalExpense(transactions);
   const balance = getBalance(transactions);
@@ -45,7 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, period }) => {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Balance */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-5 text-white shadow-lg shadow-blue-500/20">
           <div className="flex items-center justify-between mb-3">
@@ -103,6 +118,20 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, period }) => {
               style={{ width: `${Math.min(Math.max(savingsRate, 0), 100)}%` }}
             />
           </div>
+        </div>
+
+        {/* Monthly Debt */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Aylık Borç</span>
+            <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+              <CreditCard size={16} className="text-rose-600 dark:text-rose-400" />
+            </div>
+          </div>
+          <p className="text-2xl font-bold text-gray-800 dark:text-white">{formatCurrency(monthlyDebt)}</p>
+          <p className="text-xs text-gray-400 mt-2">
+            Toplam: {formatCurrency(totalDebtAmount)}
+          </p>
         </div>
       </div>
 
