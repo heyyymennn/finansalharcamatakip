@@ -13,6 +13,7 @@ import Dashboard from './components/Dashboard';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import Charts from './components/Charts';
+import AIAdvisor from './components/AIAdvisor';
 import {
   LayoutDashboard,
   List,
@@ -22,6 +23,7 @@ import {
   Sun,
   Wallet,
   Calendar,
+  Bot,
 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -71,6 +73,7 @@ const App: React.FC = () => {
     { id: 'dashboard' as ViewMode, label: 'Özet', icon: LayoutDashboard },
     { id: 'transactions' as ViewMode, label: 'İşlemler', icon: List },
     { id: 'analytics' as ViewMode, label: 'Analiz', icon: BarChart3 },
+    { id: 'ai' as ViewMode, label: 'AI Danışman', icon: Bot },
   ];
 
   const periodOptions = [
@@ -194,6 +197,12 @@ const App: React.FC = () => {
           )}
           {view === 'analytics' && (
             <Charts transactions={filteredTransactions} />
+          )}
+          {view === 'ai' && (
+            <AIAdvisor
+              transactions={filteredTransactions}
+              period={period === 'week' ? 'Bu Hafta' : period === 'month' ? 'Bu Ay' : period === 'year' ? 'Bu Yıl' : 'Tüm Zamanlar'}
+            />
           )}
         </main>
 

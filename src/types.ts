@@ -12,7 +12,7 @@ export interface CategoryBudget {
   limit: number;
 }
 
-export type ViewMode = 'dashboard' | 'transactions' | 'analytics' | 'budget';
+export type ViewMode = 'dashboard' | 'transactions' | 'analytics' | 'ai';
 
 export const INCOME_CATEGORIES = [
   'Maaş',
