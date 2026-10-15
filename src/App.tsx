@@ -14,6 +14,7 @@ import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import Charts from './components/Charts';
 import AIAdvisor from './components/AIAdvisor';
+import PWAInstallButton from './components/PWAInstallButton';
 import {
   LayoutDashboard,
   List,
@@ -213,6 +214,9 @@ const App: React.FC = () => {
             onClose={() => setShowForm(false)}
           />
         )}
+
+        {/* PWA Install Button */}
+        <PWAInstallButton />
 
         {/* Mobile Bottom Nav */}
         <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-700 sm:hidden z-40">
