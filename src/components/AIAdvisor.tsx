@@ -97,10 +97,10 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({ transactions, period }) => {
     setIsValidating(true);
     setError('');
 
-    const isValid = await validateApiKey(tempKey.trim());
+    const result = await validateApiKey(tempKey.trim());
     setIsValidating(false);
 
-    if (isValid) {
+    if (result.valid) {
       setApiKey(tempKey.trim());
       localStorage.setItem('gemini_api_key', tempKey.trim());
       setKeyValid(true);
@@ -108,8 +108,8 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({ transactions, period }) => {
       setTimeout(() => setKeyValid(null), 3000);
     } else {
       setKeyValid(false);
-      setError('API anahtarı geçersiz. Lütfen kontrol edin.');
-      setTimeout(() => setKeyValid(null), 3000);
+      setError(result.error || 'API anahtarı geçersiz. Lütfen kontrol edin.');
+      setTimeout(() => setKeyValid(null), 5000);
     }
   };
 
@@ -302,7 +302,7 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({ transactions, period }) => {
                   <p className="text-sm text-blue-800 dark:text-blue-300 font-medium mb-2">
                     📌 Ücretsiz API anahtarı nasıl alınır:
                   </p>
-                  <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
+                  <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-1.5 list-decimal list-inside">
                     <li>
                       <a
                         href="https://aistudio.google.com/apikey"
@@ -315,8 +315,15 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({ transactions, period }) => {
                     </li>
                     <li>Google hesabınızla giriş yapın</li>
                     <li>"Create API Key" butonuna tıklayın</li>
-                    <li>Oluşturulan anahtarı kopyalayıp yukarıya yapıştırın</li>
+                    <li>Oluşturulan anahtarı <strong>tamamen</strong> kopyalayın (başında/sonunda boşluk olmadığından emin olun)</li>
+                    <li>Yukarıdaki kutuya yapıştırın ve "Kaydet"e tıklayın</li>
                   </ol>
+                  <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                      ⚠️ <strong>İpucu:</strong> Anahtarınız "AIza" ile başlar ve 39 karakter uzunluğundadır. 
+                      Eğer hata alırsanız, yeni bir anahtar oluşturmayı deneyin.
+                    </p>
+                  </div>
                   <p className="text-xs text-blue-600 dark:text-blue-500 mt-2">
                     💡 Ücretsiz plan: Dakikada 15 istek, günde 1500 istek limiti
                   </p>
