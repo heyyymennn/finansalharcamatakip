@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>coder-app-name</title>
+    <title>FinansYönetim - Kişisel Bütçe Takibi</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -29,10 +29,11 @@
       }
     </style>
     <script>
-      // 在 React 加载前立即设置主题，避免闪烁
+      // Tema ayarı - kullanıcının tercihine göre
       (function () {
         const isInIframe = window.self !== window.top;
-
+        const savedTheme = localStorage.getItem('darkMode');
+        
         function applyThemeToDOM(theme) {
           document.documentElement.classList.remove("light", "dark");
           document.documentElement.classList.add(theme);
@@ -40,7 +41,6 @@
         }
 
         if (isInIframe) {
-          // 监听父窗口主动推送的主题消息
           window.addEventListener("message", function (event) {
             if (event.data && typeof event.data.theme === "string") {
               const theme = event.data.theme;
@@ -49,9 +49,17 @@
               }
             }
           });
+        }
+        
+        // Kullanıcının kayıtlı tercihi varsa uygula, yoksa sistem tercihini kullan
+        if (savedTheme === 'true') {
+          applyThemeToDOM('dark');
+        } else if (savedTheme === 'false') {
+          applyThemeToDOM('light');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          applyThemeToDOM('dark');
         } else {
-          // 非 iframe 环境，使用默认 light 主题
-          applyThemeToDOM("light");
+          applyThemeToDOM('light');
         }
       })();
     </script>
